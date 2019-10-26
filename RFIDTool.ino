@@ -247,18 +247,18 @@ void FindKeys()
     {
         WaitForCardNoPrint(mfrc522);
 
-        MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 0, GetKey(i, &key), &mfrc522.uid);
-        if (status == MFRC522::StatusCode::STATUS_OK)
+        const MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 0, GetKey(i, &key), &mfrc522.uid);
+        HaltRFID(mfrc522);
+        if (status != MFRC522::StatusCode::STATUS_OK)
         {
-            keyAIndex = i;
-            Terminal::Success(F("Found key A!"));
-            PrintKey(key);
-            HaltRFID(mfrc522);
-            found = true;
-            break;
+            continue;
         }
 
-        HaltRFID(mfrc522);
+        keyAIndex = i;
+        Terminal::Success(F("Found key A!"));
+        PrintKey(key);
+        found = true;
+        break;
     }
 
     if (!found)
@@ -273,18 +273,18 @@ void FindKeys()
     {
         WaitForCardNoPrint(mfrc522);
 
-        MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 0, GetKey(i, &key), &mfrc522.uid);
-        if (status == MFRC522::StatusCode::STATUS_OK)
+        const MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 0, GetKey(i, &key), &mfrc522.uid);
+        HaltRFID(mfrc522);
+        if (status != MFRC522::StatusCode::STATUS_OK)
         {
-            keyBIndex = i;
-            Terminal::Success(F("Found key B!"));
-            PrintKey(key);
-            HaltRFID(mfrc522);
-            found = true;
-            break;
+            continue;
         }
 
-        HaltRFID(mfrc522);
+        keyBIndex = i;
+        Terminal::Success(F("Found key B!"));
+        PrintKey(key);
+        found = true;
+        break;
     }
 
     if (!found)

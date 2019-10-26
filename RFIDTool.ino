@@ -86,7 +86,7 @@ void loop()
     case 2:
         if (!hasRead)
         {
-            Terminal::Error(F("No data has been read!"));
+            Terminal::Error(F("Read a card first!"));
             break;
         }
         Serial.println(F("Stored block 0:"));
@@ -152,7 +152,7 @@ void VerifyCard()
 {
     if (!hasRead)
     {
-        Serial.println(F("Read a card first!"));
+        Terminal::Error(F("Read a card first!"));
         return;
     }
 
@@ -185,7 +185,7 @@ void WriteCard()
 {
     if (!hasRead)
     {
-        Serial.println(F("Read a card first!"));
+        Terminal::Error(F("Read a card first!"));
         return;
     }
 
@@ -214,7 +214,7 @@ void WriteUID()
 {
     if (!hasRead)
     {
-        Serial.println(F("Read a card first!"));
+        Terminal::Error(F("Read a card first!"));
         return;
     }
 

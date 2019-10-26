@@ -91,6 +91,12 @@ static void Success(T printable)
 }
 
 template <typename T>
+static void Warn(T printable)
+{
+    PrintWithFormattingLn<T>(printable, (byte)Color::Yellow);
+}
+
+template <typename T>
 static void Error(T printable)
 {
     PrintWithFormattingLn<T>(printable, (byte)Color::Red);

@@ -28,6 +28,12 @@ static void PrintBlock0Formatted(byte *buffer)
     Terminal::PrintWithFormattingLn(buf, (byte)Terminal::Color::Yellow);
 }
 
+static void PrintBlock(byte *buffer){
+    char buf[64] = {};
+    snprintf_P(buf, sizeof(buf), PSTR("%.2X:%.2X:%.2X:%.2X %.2X:%.2X:%.2X:%.2X %.2X:%.2X:%.2X:%.2X %.2X:%.2X:%.2X:%.2X"), buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5], buffer[6], buffer[7], buffer[8], buffer[9], buffer[10], buffer[11], buffer[12], buffer[13], buffer[14], buffer[15]);
+    Serial.println(buf);
+}
+
 static void PrintKey(const MFRC522::MIFARE_Key &key)
 {
     char buf[15] = {};

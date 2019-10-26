@@ -29,8 +29,8 @@
 MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance.
 
 // Indexes into the keys array to get either key A or key B.
-byte keyAIndex = 0;
-byte keyBIndex = 0;
+byte keyAIndex[16] = {};
+byte keyBIndex[16] = {};
 
 bool hasRead = false;
 byte block0Data[16] = {0x36, 0x93, 0x7F, 0x0C, 0xD6, 0x88, 0x04, 0x00, 0xC8, 0x40, 0x00, 0x20, 0x00, 0x00, 0x00, 0x18};
@@ -49,13 +49,14 @@ int GetUserSelection()
 {
     while (true)
     {
-        Serial.print(F("1. Read card\r\n"
-                       "2. Print data\r\n"
-                       "3. Verify data\r\n"
-                       "4. Write card\r\n"
-                       "5. Write UID\r\n"
-                       "6. Find keys\r\n"
-                       "7. Print keys\r\n"
+        Serial.print(F("1. Dump card\r\n"
+                       "2. Read card\r\n"
+                       "3. Print data\r\n"
+                       "4. Verify data\r\n"
+                       "5. Write card\r\n"
+                       "6. Write UID\r\n"
+                       "7. Find keys\r\n"
+                       "8. Print keys\r\n"
                        "0. Reset\r\n"
                        "[RFIDTool@Arduino]$ "));
         while (!Serial.available())
@@ -69,7 +70,7 @@ int GetUserSelection()
         Serial.write(i);
         Serial.println();
 
-        if (i >= '0' && i <= '7')
+        if (i >= '0' && i <= '8')
             return i - '0';
 
         Terminal::Error(F("Invalid input"));
@@ -81,9 +82,12 @@ void loop()
     switch (GetUserSelection())
     {
     case 1:
-        ReadCard();
+        DumpCard();
         break;
     case 2:
+        ReadCard();
+        break;
+    case 3:
         if (!hasRead)
         {
             Terminal::Error(F("Read a card first!"));
@@ -92,19 +96,19 @@ void loop()
         Serial.println(F("Stored block 0:"));
         PrintBlock0Formatted(block0Data);
         break;
-    case 3:
+    case 4:
         VerifyCard();
         break;
-    case 4:
+    case 5:
         WriteCard();
         break;
-    case 5:
+    case 6:
         WriteUID();
         break;
-    case 6:
+    case 7:
         FindKeys();
         break;
-    case 7:
+    case 8:
         PrintKeys();
         break;
     case 0:
@@ -114,18 +118,29 @@ void loop()
     Serial.println();
 }
 
+void DumpCard()
+{
+    WaitForCard(mfrc522);
+
+    MFRC522::MIFARE_Key key = {};
+
+    for (int8_t i = 16; i >= 0; i--)
+    {
+        mfrc522.PICC_DumpMifareClassicSectorToSerial(&mfrc522.uid, GetKey(keyAIndex[i], &key), i);
+    }
+} 
+
+
 //Reads a card using key A from Find keys.
 void ReadCard()
 {
     WaitForCard(mfrc522);
 
-    mfrc522.PICC_DumpDetailsToSerial(&mfrc522.uid);
-
     byte buffer[18] = {};
     byte len = sizeof(buffer);
 
     MFRC522::MIFARE_Key key = {};
-    MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 0, GetKey(keyAIndex, &key), &mfrc522.uid);
+    MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 0, GetKey(keyAIndex[0], &key), &mfrc522.uid);
     Serial.print(F("Block 0 auth status: "));
     HandleStatusError(status, mfrc522);
 
@@ -162,7 +177,7 @@ void VerifyCard()
     WaitForCard(mfrc522);
 
     MFRC522::MIFARE_Key key = {};
-    MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 0, GetKey(keyAIndex, &key), &mfrc522.uid);
+    MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 0, GetKey(keyAIndex[0], &key), &mfrc522.uid);
     Serial.print(F("Block 0 auth status: "));
     HandleStatusError(status, mfrc522);
 
@@ -192,7 +207,7 @@ void WriteCard()
     WaitForCard(mfrc522);
 
     MFRC522::MIFARE_Key key = {};
-    MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 0, GetKey(keyBIndex, &key), &mfrc522.uid);
+    MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 0, GetKey(keyBIndex[0], &key), &mfrc522.uid);
     Serial.print(F("Block 0 auth status: "));
     HandleStatusError(status, mfrc522);
 
@@ -236,71 +251,79 @@ void WriteUID()
 
 void FindKeys()
 {
-    Terminal::PrintWithFormattingLn(F("Place card in front of RFID reader"), (byte)Terminal::Color::Blue);
-    Serial.println(F("Trying to find key A..."));
+    WaitForCard(mfrc522);
+    Terminal::Warn(F("This might take some time."));
 
     bool found = false;
 
     MFRC522::MIFARE_Key key = {};
 
-    for (size_t i = 0; i < defaultKeysLength; i++)
+    for (byte j = 0; j < 16; j++)
     {
-        WaitForCardNoPrint(mfrc522);
-
-        const MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 0, GetKey(i, &key), &mfrc522.uid);
-        HaltRFID(mfrc522);
-        if (status != MFRC522::StatusCode::STATUS_OK)
+        for (size_t i = 0; i < defaultKeysLength; i++)
         {
-            continue;
+            WaitForCardNoPrint(mfrc522);
+
+            const MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, j * 4, GetKey(i, &key), &mfrc522.uid);
+            HaltRFID(mfrc522);
+            if (status != MFRC522::StatusCode::STATUS_OK)
+            {
+                continue;
+            }
+
+            keyAIndex[j] = i;
+            found = true;
+            break;
         }
 
-        keyAIndex = i;
-        Terminal::Success(F("Found key A!"));
-        PrintKey(key);
-        found = true;
-        break;
-    }
-
-    if (!found)
-    {
-        Terminal::Error(F("Did not find key A!"));
-    }
-
-    found = false;
-
-    Serial.println(F("Trying to find key B..."));
-    for (size_t i = 0; i < defaultKeysLength; i++)
-    {
-        WaitForCardNoPrint(mfrc522);
-
-        const MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 0, GetKey(i, &key), &mfrc522.uid);
-        HaltRFID(mfrc522);
-        if (status != MFRC522::StatusCode::STATUS_OK)
+        if (!found)
         {
-            continue;
+            Terminal::Error(F("Did not find key A in sector "));
+            Terminal::Error(j);
         }
 
-        keyBIndex = i;
-        Terminal::Success(F("Found key B!"));
-        PrintKey(key);
-        found = true;
-        break;
-    }
+        found = false;
 
-    if (!found)
-    {
-        Terminal::Error(F("Did not find key B!"));
+        for (size_t i = 0; i < defaultKeysLength; i++)
+        {
+            WaitForCardNoPrint(mfrc522);
+
+            const MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, j * 4, GetKey(i, &key), &mfrc522.uid);
+            HaltRFID(mfrc522);
+            if (status != MFRC522::StatusCode::STATUS_OK)
+            {
+                continue;
+            }
+
+            keyBIndex[j] = i;
+            found = true;
+            break;
+        }
+
+        if (!found)
+        {
+            Terminal::Error(F("Did not find key B in sector "));
+            Terminal::Error(j);
+        }
     }
 }
 
 void PrintKeys()
 {
     MFRC522::MIFARE_Key key = {};
-    GetKey(keyAIndex, &key);
-    Serial.print(F("Key A: "));
-    PrintKey(key);
 
-    GetKey(keyBIndex, &key);
-    Serial.print(F("Key B: "));
-    PrintKey(key);
+    for (byte i = 0; i < sizeof(keyAIndex); i++)
+    {
+        GetKey(keyAIndex[i], &key);
+        Serial.print(F("Key A sector "));
+        Serial.print(i);
+        Serial.print(F(": "));
+        PrintKey(key);
+
+        GetKey(keyBIndex[i], &key);
+        Serial.print(F("Key B sector "));
+        Serial.print(i);
+        Serial.print(F(": "));
+        PrintKey(key);
+    }
 }

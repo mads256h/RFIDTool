@@ -29,10 +29,10 @@
 MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance.
 
 // Indexes into the keys array to get either key A or key B.
-byte keyAIndex = 0; 
+byte keyAIndex = 0;
 byte keyBIndex = 0;
 
-bool hasRead = true;
+bool hasRead = false;
 byte block0Data[16] = {0x36, 0x93, 0x7F, 0x0C, 0xD6, 0x88, 0x04, 0x00, 0xC8, 0x40, 0x00, 0x20, 0x00, 0x00, 0x00, 0x18};
 
 void setup()
@@ -84,6 +84,11 @@ void loop()
         ReadCard();
         break;
     case 2:
+        if (!hasRead)
+        {
+            Terminal::Error(F("No data has been read!"));
+            break;
+        }
         Serial.println(F("Stored block 0:"));
         PrintBlock0Formatted(block0Data);
         break;

@@ -124,10 +124,12 @@ void DumpCard()
 
     MFRC522::MIFARE_Key key = {};
 
-    for (int8_t i = 16; i >= 0; i--)
+    for (int8_t i = 15; i >= 0; i--)
     {
         mfrc522.PICC_DumpMifareClassicSectorToSerial(&mfrc522.uid, GetKey(keyAIndex[i], &key), i);
     }
+
+    HaltRFID(mfrc522);
 } 
 
 

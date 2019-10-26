@@ -35,37 +35,11 @@ static void PrintKey(const MFRC522::MIFARE_Key &key)
     Terminal::PrintWithFormattingLn(buf, (byte)Terminal::Color::Yellow);
 }
 
-static const __FlashStringHelper *StatusCodeToString(const MFRC522::StatusCode status)
-{
-    switch (status)
-    {
-    case MFRC522::StatusCode::STATUS_COLLISION:
-        return F("STATUS_COLLISION");
-    case MFRC522::StatusCode::STATUS_CRC_WRONG:
-        return F("STATUS_CRC_WRONG");
-    case MFRC522::StatusCode::STATUS_ERROR:
-        return F("STATUS_ERROR");
-    case MFRC522::StatusCode::STATUS_INTERNAL_ERROR:
-        return F("STATUS_INTERNAL_ERROR");
-    case MFRC522::StatusCode::STATUS_INVALID:
-        return F("STATUS_INVALID");
-    case MFRC522::StatusCode::STATUS_MIFARE_NACK:
-        return F("STATUS_MIFARE_NACK");
-    case MFRC522::StatusCode::STATUS_NO_ROOM:
-        return F("STATUS_NO_ROOM");
-    case MFRC522::StatusCode::STATUS_OK:
-        return F("STATUS_OK");
-    case MFRC522::StatusCode::STATUS_TIMEOUT:
-        return F("STATUS_TIMEOUT");
-
-    default:
-        return F("INVALID_STATUS");
-    }
-}
-
 static void WaitForCardNoPrint(MFRC522 &mfrc522)
 {
-    while (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial())
+    byte atqa_answer[2] = {0};
+    byte atqa_size = 2;
+    while (!(mfrc522.PICC_IsNewCardPresent() || mfrc522.PICC_WakeupA(atqa_answer, &atqa_size) == MFRC522::StatusCode::STATUS_OK) || !mfrc522.PICC_ReadCardSerial())
     {
         yield();
     }
@@ -86,15 +60,15 @@ static void HaltRFID(MFRC522 &mfrc522)
     mfrc522.PCD_StopCrypto1();
 }
 
-#define HandleStatusError(status, mfrc522)               \
-    {                                                    \
-        if (status != MFRC522::StatusCode::STATUS_OK)    \
-        {                                                \
-            Terminal::Error(StatusCodeToString(status)); \
-            HaltRFID(mfrc522);                           \
-            goto error;                                  \
-        }                                                \
-        Terminal::Success(StatusCodeToString(status));   \
+#define HandleStatusError(status, mfrc522)                       \
+    {                                                            \
+        if (status != MFRC522::StatusCode::STATUS_OK)            \
+        {                                                        \
+            Terminal::Error(MFRC522::GetStatusCodeName(status)); \
+            HaltRFID(mfrc522);                                   \
+            goto error;                                          \
+        }                                                        \
+        Terminal::Success(MFRC522::GetStatusCodeName(status));   \
     }
 
 #endif

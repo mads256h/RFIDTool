@@ -34,7 +34,7 @@ byte keyBIndex[16] = {};
 
 bool hasRead = false;
 byte block0Data[16] = {0x36, 0x93, 0x7F, 0x0C, 0xD6, 0x88, 0x04, 0x00, 0xC8, 0x40, 0x00, 0x20, 0x00, 0x00, 0x00, 0x18};
-
+byte data[16 * 4 * 16] = {0};
 
 void DumpSector(MFRC522::Uid *uid, MFRC522::MIFARE_Key *key, byte sector);
 
@@ -91,13 +91,25 @@ void loop()
         ReadCard();
         break;
     case 3:
-        if (!hasRead)
+        // if (!hasRead)
+        // {
+        //     Terminal::Error(F("Read a card first!"));
+        //     break;
+        // }
+        //Serial.println(F("Stored block 0:"));
+
+        for (int8_t i = 63; i >= 1; i--)
         {
-            Terminal::Error(F("Read a card first!"));
-            break;
+            Serial.print(i);
+            Serial.write(' ');
+            if (i < 10)
+                Serial.write(' ');
+
+            PrintBlock(data + (i * 16));
         }
-        Serial.println(F("Stored block 0:"));
-        PrintBlock0Formatted(block0Data);
+
+        PrintBlock0Formatted(data);
+
         break;
     case 4:
         VerifyCard();
@@ -134,39 +146,59 @@ void DumpCard()
     }
 
     HaltRFID(mfrc522);
-} 
-
+}
 
 //Reads a card using key A from Find keys.
 void ReadCard()
 {
     WaitForCard(mfrc522);
 
-    byte buffer[18] = {};
-    byte len = sizeof(buffer);
+    for (int8_t i = 63; i >= 0; i--)
+    {
+        WaitForCardNoPrint(mfrc522);
 
-    MFRC522::MIFARE_Key key = {};
-    MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 0, GetKey(keyAIndex[0], &key), &mfrc522.uid);
-    Serial.print(F("Block 0 auth status: "));
-    HandleStatusError(status, mfrc522);
+        byte buffer[18] = {};
+        byte len = sizeof(buffer);
 
-    status = mfrc522.MIFARE_Read(0, buffer, &len);
-    Serial.print(F("Block 0 read status: "));
-    HandleStatusError(status, mfrc522);
+        MFRC522::MIFARE_Key key = {};
 
-    Serial.println(F("Read following 16 bytes:"));
-    PrintBlock0Formatted(buffer);
+        MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, i, GetKey(keyAIndex[i / 4], &key), &mfrc522.uid);
+        //PrintKey(key);
+        Serial.print(F("Block "));
+        Serial.print(i);
+        Serial.print(F(" auth status: "));
+        HandleStatusError(status, mfrc522);
 
-    memcpy(block0Data, buffer, sizeof(block0Data));
+        status = mfrc522.MIFARE_Read(i, buffer, &len);
+        Serial.print(F("Block "));
+        Serial.print(i);
+        Serial.print(F(" read status: "));
+        HandleStatusError(status, mfrc522);
+
+        memcpy(data + (i * 16), buffer, 16);
+
+        if (i % 4 == 3)
+        {
+            memcpy(data + (i * 16), key.keyByte, 6);
+
+            GetKey(keyBIndex[i / 4], &key);
+            memcpy(data + (i * 16) + 10, key.keyByte, 6);
+        }
+
+        HaltRFID(mfrc522);
+    }
+
     hasRead = true;
 
     Terminal::Success(F("Read SUCCESS!"));
 
     HaltRFID(mfrc522);
+    delay(1);
     return;
 
 error:
     Terminal::Error(F("Read FAILED!"));
+    HaltRFID(mfrc522);
 }
 
 void VerifyCard()
@@ -210,25 +242,40 @@ void WriteCard()
         return;
     }
 
+    if (!Terminal::Confirm(F("Proceed with writing to the card? This cannot be undone!"))) return;
+
     WaitForCard(mfrc522);
 
-    MFRC522::MIFARE_Key key = {};
-    MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 0, GetKey(keyBIndex[0], &key), &mfrc522.uid);
-    Serial.print(F("Block 0 auth status: "));
-    HandleStatusError(status, mfrc522);
+    for (byte i = 0; i < 64; i++)
+    {
+        WaitForCardNoPrint(mfrc522);
 
-    status = mfrc522.MIFARE_Write(0, block0Data, 16);
-    Serial.print(F("Block 0 write status: "));
-    HandleStatusError(status, mfrc522);
+        MFRC522::MIFARE_Key key = {};
+        MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, i, GetKey(keyBIndex[i / 4], &key), &mfrc522.uid);
+        PrintKey(key);
+        Serial.print(F("Block "));
+        Serial.print(i);
+        Serial.print(F(" auth status: "));
+        HandleStatusError(status, mfrc522);
 
-    Terminal::Success(F("Write SUCCESS!"));
+        status = mfrc522.MIFARE_Write(i, data + (i * 16), 16);
+        Serial.print(F("Block "));
+        Serial.print(i);
+        Serial.print(F(" write status: "));
+        HandleStatusError(status, mfrc522);
+
+        Terminal::Success(F("Write SUCCESS!"));
+
+        HaltRFID(mfrc522);
+        continue;
+
+    error:
+        Terminal::Error(F("Write FAILED!"));
+        HaltRFID(mfrc522);
+        continue;
+    }
+
     Serial.println(F("Remember to verify the write"));
-
-    HaltRFID(mfrc522);
-    return;
-
-error:
-    Terminal::Error(F("Write FAILED!"));
 }
 
 void WriteUID()
@@ -334,93 +381,105 @@ void PrintKeys()
     }
 }
 
-void DumpSector(MFRC522::Uid *uid,			///< Pointer to Uid struct returned from a successful PICC_Select().
-													MFRC522::MIFARE_Key *key,	///< Key A for the sector.
-													byte sector			///< The sector to dump, 0..39.
-													) {
-	MFRC522::StatusCode status;
-	byte firstBlock;		// Address of lowest address to dump actually last block dumped)
-	byte no_of_blocks;		// Number of blocks in sector
-	bool isSectorTrailer;	// Set to true while handling the "last" (ie highest address) in the sector.
-	
-	// The access bits are stored in a peculiar fashion.
-	// There are four groups:
-	//		g[3]	Access bits for the sector trailer, block 3 (for sectors 0-31) or block 15 (for sectors 32-39)
-	//		g[2]	Access bits for block 2 (for sectors 0-31) or blocks 10-14 (for sectors 32-39)
-	//		g[1]	Access bits for block 1 (for sectors 0-31) or blocks 5-9 (for sectors 32-39)
-	//		g[0]	Access bits for block 0 (for sectors 0-31) or blocks 0-4 (for sectors 32-39)
-	// Each group has access bits [C1 C2 C3]. In this code C1 is MSB and C3 is LSB.
-	// The four CX bits are stored together in a nible cx and an inverted nible cx_.
-	byte c1, c2, c3;		// Nibbles
-	byte c1_, c2_, c3_;		// Inverted nibbles
-	bool invertedError;		// True if one of the inverted nibbles did not match
-	byte g[4];				// Access bits for each of the four groups.
-	byte group;				// 0-3 - active group for access bits
-	bool firstInGroup;		// True for the first block dumped in the group
-	
-	// Determine position and size of sector.
-	if (sector < 32) { // Sectors 0..31 has 4 blocks each
-		no_of_blocks = 4;
-		firstBlock = sector * no_of_blocks;
-	}
-	else if (sector < 40) { // Sectors 32-39 has 16 blocks each
-		no_of_blocks = 16;
-		firstBlock = 128 + (sector - 32) * no_of_blocks;
-	}
-	else { // Illegal input, no MIFARE Classic PICC has more than 40 sectors.
-		return;
-	}
-		
-	// Dump blocks, highest address first.
-	byte byteCount;
-	byte buffer[18];
-	byte blockAddr;
-	isSectorTrailer = true;
-	invertedError = false;	// Avoid "unused variable" warning.
-	for (int8_t blockOffset = no_of_blocks - 1; blockOffset >= 0; blockOffset--) {
-		blockAddr = firstBlock + blockOffset;
-		// Sector number - only on first line
-		if (isSectorTrailer) {
-			if(sector < 10)
-				Serial.print(F("   ")); // Pad with spaces
-			else
-				Serial.print(F("  ")); // Pad with spaces
-			Serial.print(sector);
-			Serial.print(F("   "));
-		}
-		else {
-			Serial.print(F("       "));
-		}
-		// Block number
-		if(blockAddr < 10)
-			Serial.print(F("   ")); // Pad with spaces
-		else {
-			if(blockAddr < 100)
-				Serial.print(F("  ")); // Pad with spaces
-			else
-				Serial.print(F(" ")); // Pad with spaces
-		}
-		Serial.print(blockAddr);
-		Serial.print(F("  "));
-		// Establish encrypted communications before reading the first block
-		if (isSectorTrailer) {
-			status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, firstBlock, key, uid);
-			if (status != MFRC522::STATUS_OK) {
-				Serial.print(F("PCD_Authenticate() failed: "));
-				Serial.println(MFRC522::GetStatusCodeName(status));
-				return;
-			}
-		}
-		// Read block
-		byteCount = sizeof(buffer);
-		status = mfrc522.MIFARE_Read(blockAddr, buffer, &byteCount);
-		if (status != MFRC522::STATUS_OK) {
-			Serial.print(F("MIFARE_Read() failed: "));
-			Serial.println(MFRC522::GetStatusCodeName(status));
-			continue;
-		}
+void DumpSector(MFRC522::Uid *uid,        ///< Pointer to Uid struct returned from a successful PICC_Select().
+                MFRC522::MIFARE_Key *key, ///< Key A for the sector.
+                byte sector               ///< The sector to dump, 0..39.
+)
+{
+    MFRC522::StatusCode status;
+    byte firstBlock;      // Address of lowest address to dump actually last block dumped)
+    byte no_of_blocks;    // Number of blocks in sector
+    bool isSectorTrailer; // Set to true while handling the "last" (ie highest address) in the sector.
 
-        if (isSectorTrailer){
+    // The access bits are stored in a peculiar fashion.
+    // There are four groups:
+    //		g[3]	Access bits for the sector trailer, block 3 (for sectors 0-31) or block 15 (for sectors 32-39)
+    //		g[2]	Access bits for block 2 (for sectors 0-31) or blocks 10-14 (for sectors 32-39)
+    //		g[1]	Access bits for block 1 (for sectors 0-31) or blocks 5-9 (for sectors 32-39)
+    //		g[0]	Access bits for block 0 (for sectors 0-31) or blocks 0-4 (for sectors 32-39)
+    // Each group has access bits [C1 C2 C3]. In this code C1 is MSB and C3 is LSB.
+    // The four CX bits are stored together in a nible cx and an inverted nible cx_.
+    byte c1, c2, c3;    // Nibbles
+    byte c1_, c2_, c3_; // Inverted nibbles
+    bool invertedError; // True if one of the inverted nibbles did not match
+    byte g[4];          // Access bits for each of the four groups.
+    byte group;         // 0-3 - active group for access bits
+    bool firstInGroup;  // True for the first block dumped in the group
+
+    // Determine position and size of sector.
+    if (sector < 32)
+    { // Sectors 0..31 has 4 blocks each
+        no_of_blocks = 4;
+        firstBlock = sector * no_of_blocks;
+    }
+    else if (sector < 40)
+    { // Sectors 32-39 has 16 blocks each
+        no_of_blocks = 16;
+        firstBlock = 128 + (sector - 32) * no_of_blocks;
+    }
+    else
+    { // Illegal input, no MIFARE Classic PICC has more than 40 sectors.
+        return;
+    }
+
+    // Dump blocks, highest address first.
+    byte byteCount;
+    byte buffer[18];
+    byte blockAddr;
+    isSectorTrailer = true;
+    invertedError = false; // Avoid "unused variable" warning.
+    for (int8_t blockOffset = no_of_blocks - 1; blockOffset >= 0; blockOffset--)
+    {
+        blockAddr = firstBlock + blockOffset;
+        // Sector number - only on first line
+        if (isSectorTrailer)
+        {
+            if (sector < 10)
+                Serial.print(F("   ")); // Pad with spaces
+            else
+                Serial.print(F("  ")); // Pad with spaces
+            Serial.print(sector);
+            Serial.print(F("   "));
+        }
+        else
+        {
+            Serial.print(F("       "));
+        }
+        // Block number
+        if (blockAddr < 10)
+            Serial.print(F("   ")); // Pad with spaces
+        else
+        {
+            if (blockAddr < 100)
+                Serial.print(F("  ")); // Pad with spaces
+            else
+                Serial.print(F(" ")); // Pad with spaces
+        }
+        Serial.print(blockAddr);
+        Serial.print(F("  "));
+        // Establish encrypted communications before reading the first block
+        if (isSectorTrailer)
+        {
+            status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, firstBlock, key, uid);
+            if (status != MFRC522::STATUS_OK)
+            {
+                Serial.print(F("PCD_Authenticate() failed: "));
+                Serial.println(MFRC522::GetStatusCodeName(status));
+                return;
+            }
+        }
+        // Read block
+        byteCount = sizeof(buffer);
+        status = mfrc522.MIFARE_Read(blockAddr, buffer, &byteCount);
+        if (status != MFRC522::STATUS_OK)
+        {
+            Serial.print(F("MIFARE_Read() failed: "));
+            Serial.println(MFRC522::GetStatusCodeName(status));
+            continue;
+        }
+
+        if (isSectorTrailer)
+        {
             MFRC522::MIFARE_Key key = {};
             GetKey(keyAIndex[sector], &key);
             memcpy(buffer, key.keyByte, sizeof(key.keyByte));
@@ -429,62 +488,74 @@ void DumpSector(MFRC522::Uid *uid,			///< Pointer to Uid struct returned from a 
             memcpy(buffer + 10, key.keyByte, sizeof(key.keyByte));
         }
 
-		// Dump data
-		for (byte index = 0; index < 16; index++) {
-			if(buffer[index] < 0x10)
-				Serial.print(F(" 0"));
-			else
-				Serial.print(F(" "));
-			Serial.print(buffer[index], HEX);
-			if ((index % 4) == 3) {
-				Serial.print(F(" "));
-			}
-		}
-		// Parse sector trailer data
-		if (isSectorTrailer) {
-			c1  = buffer[7] >> 4;
-			c2  = buffer[8] & 0xF;
-			c3  = buffer[8] >> 4;
-			c1_ = buffer[6] & 0xF;
-			c2_ = buffer[6] >> 4;
-			c3_ = buffer[7] & 0xF;
-			invertedError = (c1 != (~c1_ & 0xF)) || (c2 != (~c2_ & 0xF)) || (c3 != (~c3_ & 0xF));
-			g[0] = ((c1 & 1) << 2) | ((c2 & 1) << 1) | ((c3 & 1) << 0);
-			g[1] = ((c1 & 2) << 1) | ((c2 & 2) << 0) | ((c3 & 2) >> 1);
-			g[2] = ((c1 & 4) << 0) | ((c2 & 4) >> 1) | ((c3 & 4) >> 2);
-			g[3] = ((c1 & 8) >> 1) | ((c2 & 8) >> 2) | ((c3 & 8) >> 3);
-			isSectorTrailer = false;
-		}
-		
-		// Which access group is this block in?
-		if (no_of_blocks == 4) {
-			group = blockOffset;
-			firstInGroup = true;
-		}
-		else {
-			group = blockOffset / 5;
-			firstInGroup = (group == 3) || (group != (blockOffset + 1) / 5);
-		}
-		
-		if (firstInGroup) {
-			// Print access bits
-			Serial.print(F(" [ "));
-			Serial.print((g[group] >> 2) & 1, DEC); Serial.print(F(" "));
-			Serial.print((g[group] >> 1) & 1, DEC); Serial.print(F(" "));
-			Serial.print((g[group] >> 0) & 1, DEC);
-			Serial.print(F(" ] "));
-			if (invertedError) {
-				Serial.print(F(" Inverted access bits did not match! "));
-			}
-		}
-		
-		if (group != 3 && (g[group] == 1 || g[group] == 6)) { // Not a sector trailer, a value block
-			int32_t value = (int32_t(buffer[3])<<24) | (int32_t(buffer[2])<<16) | (int32_t(buffer[1])<<8) | int32_t(buffer[0]);
-			Serial.print(F(" Value=0x")); Serial.print(value, HEX);
-			Serial.print(F(" Adr=0x")); Serial.print(buffer[12], HEX);
-		}
-		Serial.println();
-	}
-	
-	return;
+        // Dump data
+        for (byte index = 0; index < 16; index++)
+        {
+            if (buffer[index] < 0x10)
+                Serial.print(F(" 0"));
+            else
+                Serial.print(F(" "));
+            Serial.print(buffer[index], HEX);
+            if ((index % 4) == 3)
+            {
+                Serial.print(F(" "));
+            }
+        }
+        // Parse sector trailer data
+        if (isSectorTrailer)
+        {
+            c1 = buffer[7] >> 4;
+            c2 = buffer[8] & 0xF;
+            c3 = buffer[8] >> 4;
+            c1_ = buffer[6] & 0xF;
+            c2_ = buffer[6] >> 4;
+            c3_ = buffer[7] & 0xF;
+            invertedError = (c1 != (~c1_ & 0xF)) || (c2 != (~c2_ & 0xF)) || (c3 != (~c3_ & 0xF));
+            g[0] = ((c1 & 1) << 2) | ((c2 & 1) << 1) | ((c3 & 1) << 0);
+            g[1] = ((c1 & 2) << 1) | ((c2 & 2) << 0) | ((c3 & 2) >> 1);
+            g[2] = ((c1 & 4) << 0) | ((c2 & 4) >> 1) | ((c3 & 4) >> 2);
+            g[3] = ((c1 & 8) >> 1) | ((c2 & 8) >> 2) | ((c3 & 8) >> 3);
+            isSectorTrailer = false;
+        }
+
+        // Which access group is this block in?
+        if (no_of_blocks == 4)
+        {
+            group = blockOffset;
+            firstInGroup = true;
+        }
+        else
+        {
+            group = blockOffset / 5;
+            firstInGroup = (group == 3) || (group != (blockOffset + 1) / 5);
+        }
+
+        if (firstInGroup)
+        {
+            // Print access bits
+            Serial.print(F(" [ "));
+            Serial.print((g[group] >> 2) & 1, DEC);
+            Serial.print(F(" "));
+            Serial.print((g[group] >> 1) & 1, DEC);
+            Serial.print(F(" "));
+            Serial.print((g[group] >> 0) & 1, DEC);
+            Serial.print(F(" ] "));
+            if (invertedError)
+            {
+                Serial.print(F(" Inverted access bits did not match! "));
+            }
+        }
+
+        if (group != 3 && (g[group] == 1 || g[group] == 6))
+        { // Not a sector trailer, a value block
+            int32_t value = (int32_t(buffer[3]) << 24) | (int32_t(buffer[2]) << 16) | (int32_t(buffer[1]) << 8) | int32_t(buffer[0]);
+            Serial.print(F(" Value=0x"));
+            Serial.print(value, HEX);
+            Serial.print(F(" Adr=0x"));
+            Serial.print(buffer[12], HEX);
+        }
+        Serial.println();
+    }
+
+    return;
 } // End PICC_DumpMifareClassicSectorToSerial()

@@ -102,6 +102,32 @@ static void Error(T printable)
     PrintWithFormattingLn<T>(printable, (byte)Color::Red);
 }
 
+template <typename T>
+static bool Confirm(T printable)
+{
+    PrintWithFormatting<T>(printable, (byte)Color::Yellow);
+    Serial.print(F(" [y/n]"));
+
+    while (true)
+    {
+        while (!Serial.available())
+        {
+            yield();
+        }
+
+        const int i = Serial.read();
+
+        if (i == 'y' || i == 'n')
+        {
+            Serial.write(i);
+            Serial.println();
+            return i == 'y';
+        }
+
+        yield();
+    }
+}
+
 } // namespace Terminal
 
 #endif

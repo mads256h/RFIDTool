@@ -66,6 +66,7 @@ static void HaltRFID(MFRC522 &mfrc522)
     mfrc522.PCD_StopCrypto1();
 }
 
+
 #define HandleStatusError(status, mfrc522)                       \
     {                                                            \
         if (status != MFRC522::StatusCode::STATUS_OK)            \

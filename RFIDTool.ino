@@ -22,6 +22,7 @@
 #include "utils.h"
 #include "terminal.h"
 #include "keys.h"
+#include "templates.h"
 
 #define RST_PIN 9 // Configurable, see typical pin layout above
 #define SS_PIN 10 // Configurable, see typical pin layout above
@@ -60,6 +61,7 @@ int GetUserSelection()
                        "6. Write UID\r\n"
                        "7. Find keys\r\n"
                        "8. Print keys\r\n"
+                       "9. Get template\r\n"
                        "0. Reset\r\n"
                        "[RFIDTool@Arduino]$ "));
         while (!Serial.available())
@@ -73,7 +75,7 @@ int GetUserSelection()
         Serial.write(i);
         Serial.println();
 
-        if (i >= '0' && i <= '8')
+        if (i >= '0' && i <= '9')
             return i - '0';
 
         Terminal::Error(F("Invalid input"));
@@ -125,6 +127,9 @@ void loop()
         break;
     case 8:
         PrintKeys();
+        break;
+    case 9:
+        GetTemplate();
         break;
     case 0:
         Reset();
@@ -559,3 +564,27 @@ void DumpSector(MFRC522::Uid *uid,        ///< Pointer to Uid struct returned fr
 
     return;
 } // End PICC_DumpMifareClassicSectorToSerial()
+
+void GetTemplate(){
+
+    Serial.println(F("Select Template:\r\n\r\n1. Blank"));
+
+    while (!Serial.available()){};
+
+    bool oldHasRead = hasRead;
+
+    hasRead = true;
+
+    switch (Serial.read() - '0')
+    {
+    case 1:
+        ApplyTemplate(data, Template::Blank);
+        break;
+    
+    default:
+        Terminal::Error(F("Invalid selection."));
+        hasRead = oldHasRead;
+        break;
+    }
+    
+}

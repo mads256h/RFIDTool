@@ -39,6 +39,16 @@ byte data[16 * 4 * 16] = {0};
 
 void DumpSector(MFRC522::Uid *uid, MFRC522::MIFARE_Key *key, byte sector);
 
+void DumpCard();
+void ReadCard();
+void VerifyCard();
+void WriteCard();
+void WriteUID();
+void FindKeys();
+void PrintKeys();
+void GetTemplate();
+
+
 void setup()
 {
     Serial.begin(9600);

@@ -34,3 +34,5 @@
 .vs/
 .vscode/
 __vm/
+Debug/
+Release/

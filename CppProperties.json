@@ -1,0 +1,31 @@
+{
+  "configurations": [
+    {
+      "name": "Visual Micro",
+      "intelliSenseMode": "windows-msvc-x86",
+      "includePath": [
+        "${projectRoot}..\\RFIDTool",
+        "${projectRoot}..\\..\\..\\scoop\\apps\\arduino\\current\\hardware\\arduino\\avr\\libraries\\SPI\\src",
+        "${projectRoot}..\\..\\Arduino\\libraries\\rfid-1.4.5\\src",
+        "${projectRoot}..\\..\\..\\scoop\\apps\\arduino\\current\\hardware\\arduino\\avr\\cores\\arduino",
+        "${projectRoot}..\\..\\..\\scoop\\apps\\arduino\\current\\hardware\\arduino\\avr\\variants\\standard",
+        "${projectRoot}..\\..\\..\\scoop\\apps\\arduino\\current\\hardware\\tools\\avr\\avr\\include",
+        "${projectRoot}..\\..\\..\\scoop\\apps\\arduino\\current\\hardware\\tools\\avr\\avr\\include\\avr",
+        "${projectRoot}..\\..\\..\\scoop\\apps\\arduino\\current\\hardware\\tools\\avr\\lib\\gcc\\avr\\4.9.2\\include",
+        "${projectRoot}..\\..\\..\\scoop\\apps\\arduino\\current\\hardware\\tools\\avr\\lib\\gcc\\avr\\4.9.2\\include",
+        "${projectRoot}..\\..\\..\\scoop\\apps\\arduino\\current\\hardware\\tools\\avr\\lib\\gcc\\avr\\4.9.3\\include"
+      ],
+      "defines": [
+        "__AVR_atmega328p__",
+        "__AVR_ATmega328P__",
+        "__AVR_ATmega328p__",
+        "F_CPU=16000000L",
+        "ARDUINO=108010",
+        "ARDUINO_AVR_UNO",
+        "ARDUINO_ARCH_AVR",
+        "__cplusplus=201103L",
+        "_VMICRO_INTELLISENSE"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C5F80730-F44F-4478-BDAE-6634EFC2CA88}</ProjectGuid>
+    <RootNamespace>RFIDTool</RootNamespace>
+    <ProjectName>RFIDTool</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>
+    </PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>
+    </PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>
+    </PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>
+    </PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\RFIDTool;$(ProjectDir)..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\libraries\SPI\src;$(ProjectDir)..\..\Arduino\libraries\rfid-1.4.5\src;$(ProjectDir)..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino;$(ProjectDir)..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\variants\standard;$(ProjectDir)..\..\..\scoop\apps\arduino\current\hardware\tools\avr\avr\include;$(ProjectDir)..\..\..\scoop\apps\arduino\current\hardware\tools\avr\avr\include\avr;$(ProjectDir)..\..\..\scoop\apps\arduino\current\hardware\tools\avr\lib\gcc\avr\4.9.2\include;$(ProjectDir)..\..\..\scoop\apps\arduino\current\hardware\tools\avr\lib\gcc\avr\4.9.2\include;$(ProjectDir)..\..\..\scoop\apps\arduino\current\hardware\tools\avr\lib\gcc\avr\4.9.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>$(ProjectDir)__vm\.RFIDTool.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <IgnoreStandardIncludePath>true</IgnoreStandardIncludePath>
+      <PreprocessorDefinitions>__AVR_atmega328p__;__AVR_ATmega328P__;__AVR_ATmega328p__;F_CPU=16000000L;ARDUINO=108010;ARDUINO_AVR_UNO;ARDUINO_ARCH_AVR;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="VisualMicro" />
+  </ItemGroup>
+  <PropertyGroup>
+    <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\wiring_pulse.S" />
+    <None Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\libraries\SPI\library.properties" />
+    <None Include="..\..\Arduino\libraries\rfid-1.4.5\library.json" />
+    <None Include="..\..\Arduino\libraries\rfid-1.4.5\library.properties" />
+    <None Include="RFIDTool.ino">
+      <FileType>CppCode</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\arduino folders read me.txt">
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\Arduino.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\binary.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\Client.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\HardwareSerial.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\HardwareSerial_private.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\IPAddress.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\new.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\PluggableUSB.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\Print.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\Printable.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\Server.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\Stream.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\Udp.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\USBAPI.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\USBCore.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\USBDesc.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\WCharacter.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\wiring_private.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\WString.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\libraries\SPI\src\SPI.h" />
+    <ClInclude Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\variants\standard\pins_arduino.h" />
+    <ClInclude Include="..\..\Arduino\libraries\rfid-1.4.5\src\deprecated.h" />
+    <ClInclude Include="..\..\Arduino\libraries\rfid-1.4.5\src\MFRC522.h" />
+    <ClInclude Include="..\..\Arduino\libraries\rfid-1.4.5\src\MFRC522Extended.h" />
+    <ClInclude Include="..\..\Arduino\libraries\rfid-1.4.5\src\require_cpp11.h" />
+    <ClInclude Include="keys.h" />
+    <ClInclude Include="templates.h" />
+    <ClInclude Include="terminal.h" />
+    <ClInclude Include="utils.h" />
+    <ClInclude Include="__vm\.RFIDTool.vsarduino.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\abi.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\CDC.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\HardwareSerial.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\HardwareSerial0.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\HardwareSerial1.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\HardwareSerial2.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\HardwareSerial3.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\hooks.c" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\IPAddress.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\main.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\new.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\PluggableUSB.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\Print.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\Stream.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\Tone.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\USBCore.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\WInterrupts.c" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\wiring.c" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\wiring_analog.c" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\wiring_digital.c" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\wiring_pulse.c" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\wiring_shift.c" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\WMath.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\cores\arduino\WString.cpp" />
+    <ClCompile Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\libraries\SPI\src\SPI.cpp" />
+    <ClCompile Include="..\..\Arduino\libraries\rfid-1.4.5\src\MFRC522.cpp" />
+    <ClCompile Include="..\..\Arduino\libraries\rfid-1.4.5\src\MFRC522Extended.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\scoop\apps\arduino\current\hardware\arduino\avr\libraries\SPI\keywords.txt" />
+    <Text Include="..\..\Arduino\libraries\rfid-1.4.5\changes.txt" />
+    <Text Include="..\..\Arduino\libraries\rfid-1.4.5\keywords.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties config.Debug.customdebug_uno_debugger_type="none" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

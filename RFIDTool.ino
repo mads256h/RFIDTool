@@ -93,12 +93,11 @@ void loop()
         ReadCard();
         break;
     case 3:
-        // if (!hasRead)
-        // {
-        //     Terminal::Error(F("Read a card first!"));
-        //     break;
-        // }
-        //Serial.println(F("Stored block 0:"));
+        if (!hasRead)
+        {
+            Terminal::Error(F("Read a card first!"));
+            break;
+        }
 
         for (int8_t i = 63; i >= 1; i--)
         {
@@ -208,11 +207,7 @@ error:
 
 void VerifyCard()
 {
-    if (!hasRead)
-    {
-        Terminal::Error(F("Read a card first!"));
-        return;
-    }
+    CheckHasRead();
 
     byte buffer[18] = {};
     byte len = sizeof(buffer);
@@ -241,13 +236,10 @@ error:
 
 void WriteCard()
 {
-    if (!hasRead)
-    {
-        Terminal::Error(F("Read a card first!"));
-        return;
-    }
+    CheckHasRead();
 
-    if (!Terminal::Confirm(F("Proceed with writing to the card? This cannot be undone!"))) return;
+    if (!Terminal::Confirm(F("Proceed with writing to the card? This cannot be undone!")))
+        return;
 
     WaitForCard(mfrc522);
 
@@ -257,7 +249,6 @@ void WriteCard()
 
         MFRC522::MIFARE_Key key = {};
         MFRC522::StatusCode status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, i, GetKey(keyBIndex[i / 4], &key), &mfrc522.uid);
-        PrintKey(key);
         Serial.print(F("Block "));
         Serial.print(i);
         Serial.print(F(" auth status: "));
@@ -268,8 +259,6 @@ void WriteCard()
         Serial.print(i);
         Serial.print(F(" write status: "));
         HandleStatusError(status, mfrc522);
-
-        Terminal::Success(F("Write SUCCESS!"));
 
         HaltRFID(mfrc522);
         continue;
@@ -285,11 +274,7 @@ void WriteCard()
 
 void WriteUID()
 {
-    if (!hasRead)
-    {
-        Terminal::Error(F("Read a card first!"));
-        return;
-    }
+    CheckHasRead();
 
     WaitForCard(mfrc522);
 
@@ -565,13 +550,16 @@ void DumpSector(MFRC522::Uid *uid,        ///< Pointer to Uid struct returned fr
     return;
 } // End PICC_DumpMifareClassicSectorToSerial()
 
-void GetTemplate(){
+void GetTemplate()
+{
 
     Serial.println(F("Select Template:\r\n\r\n1. Blank"));
 
-    while (!Serial.available()){};
+    while (!Serial.available())
+    {
+    };
 
-    bool oldHasRead = hasRead;
+    const bool oldHasRead = hasRead;
 
     hasRead = true;
 
@@ -580,11 +568,10 @@ void GetTemplate(){
     case 1:
         ApplyTemplate(data, Template::Blank);
         break;
-    
+
     default:
         Terminal::Error(F("Invalid selection."));
         hasRead = oldHasRead;
         break;
     }
-    
 }

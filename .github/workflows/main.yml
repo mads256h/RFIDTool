@@ -32,3 +32,4 @@ jobs:
       with:
         # Path to a single sketch
         sketch: RFIDTool.ino
+    - run: ls

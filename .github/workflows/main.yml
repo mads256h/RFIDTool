@@ -23,13 +23,10 @@ jobs:
     - uses: actions/checkout@v2
   
     - name: Download RFID library
-      uses: Legion2/download-release-action@v2.1.0
+      uses: actions/checkout@v2
       with:
         repository: miguelbalboa/rfid
-        tag: '1.4.6'
         path: libraries
-        file: 1.4.6.zip
-    
     - name: Run arduino-builder
       uses: Legion2/arduino-builder-action@v2.0.0
       with:
